@@ -1,0 +1,54 @@
+1.边缘检测
+
+function edge_detection(imgpath)
+A=imread(imgpath); %读取图像
+%[I,map]=imread(imgpath);  %'test4.bmp'是索引图像
+%A=ind2gray(I,map);
+A=A(:,:,1);
+prewitt_edge_detection=edge(A,'prewitt');
+sobel_edge_detection=edge(A,'sobel');
+log_edge_detection=edge(A,'log');
+canny_edge_detection=edge(A,'canny');
+figure(1);
+imshow(A);title('test1 原图');
+figure(2);
+imshow(prewitt_edge_detection);title('test1 prewitt');
+figure(3);
+imshow(sobel_edge_detection);title('test1 sobel');
+figure(4);
+imshow(log_edge_detection);title('test1 log');
+figure(5);
+imshow(canny_edge_detection);title('test1 canny');
+end
+
+
+2.直线检测
+
+function hough_straightline_detection(imgpath,method,extremum_number)
+I=imread(imgpath);
+%[I,map]=imread(imgpath);  %'test4.bmp'是索引图像
+%I=ind2gray(I,map);
+A=I(:,:,1);
+n=extremum_number;
+BW = edge(A,method);%提取图像边界，返回二值图像(边界1,否则0)
+[H,T,R] = hough(BW);%计算二值图像的标准霍夫变换，H为霍夫变换矩阵，I,R为计算霍夫变换的角度和半径值
+P = houghpeaks(H,n);%提取n个极值点
+x = T(P(:,2));
+y = R(P(:,1));
+lines=houghlines(BW,T,R,P);%提取线段
+figure(1);
+imshow(A);title('原图');
+figure(2);
+imshow(H,[],'XData',T,'YData',R,'InitialMagnification','fit');%hough变换的图像
+xlabel('\theta'), ylabel('\rho');
+axis on,axis square,hold on;
+plot(x,y,'s','color','white');%标出极值点
+figure(3);
+imshow(A),hold on;title(['边界提取方法 ',method,'    极值点个数=',num2str(n)]),hold on;
+for k = 1:length(lines)
+xy = [lines(k).point1; lines(k).point2];
+plot(xy(:,1),xy(:,2),'LineWidth',1,'Color','y');%画出线段
+plot(xy(1,1),xy(1,2),'.','LineWidth',1,'Color','r');%起点
+plot(xy(2,1),xy(2,2),'.','LineWidth',1,'Color','r');%终点
+end
+end
